@@ -1,74 +1,97 @@
-# # A =[ 
-# #   [2, 3, 4],
-# #   [1, 5, 6],
-# #   [5, 8, 5]
-# # ]
-# # # print("Total sum")
-# # # sum = 0
-# # # for i in range(len(A)):
-# # #     for j in range(len(A[i])):
-# # #         print(A[i][j])
-# # #         sum += A[i][j]
-# # # print(sum)
+# -----------------------------
+# Question 2: Matrix with 1 (diagonal), 2 (above), 3 (below)
+# -----------------------------
+print("\nQuestion 2: Custom Matrix Generation")
+A = []
+row = int(input("Enter number of rows: "))
+col = int(input("Enter number of columns: "))
 
-# # print("Sum of diagonal elements")
-# # sum = 0
-# # for i in range(len(A)):
-# #     for j in range(len(A[i])):
-# #         if i == j:
-# #             # print(A[i][j])
-# #             sum += A[i][j]
-# # print(sum)
+for i in range(row):
+    temp = []
+    for j in range(col):
+        if i == j:
+            temp.append(1)
+        elif i < j:
+            temp.append(2)
+        else:
+            temp.append(3)
+    A.append(temp)
 
-# # print("Sum of above diagonal elements")
-# # sum = 0
-# # for i in range(len(A)):
-# #     for j in range(len(A[i])):
-# #         if i < j:
-# #             # print(A[i][j])
-# #             sum += A[i][j]
-# # print(sum)
+print("Generated Matrix:")
+for r in A:
+    print(r)
 
-# # print("Sum of below diagonal elements")
-# # sum = 0
-# # for i in range(len(A)):
-# #     for j in range(len(A[i])):
-# #         if i > j:
-# #             # print(A[i][j])
-# #             sum += A[i][j]
-# # print(sum)
-# A =[ 
-#   [2, 3, 4],
-#   [1, 5, 6],
-#   [5, 8, 5]
-# ]
-# min = A[0][0]
-# max = A[0][0]
-# for i in range(len(A)):
-#     for j in range(len(A[i])):
-#         if min > A[i][j]:
-#             min = A[i][j]
-            
-#         if max < A[i][j]:
-#             max=A[i][j]
-            
-# print("min", min)
-# print("max", max)
-            
-#         # print(A[i][j])
 
-N = int(input("Enter the total no. of students: ")) #N=2
+# -----------------------------
+# Question 3: Matrix Sum Calculations
+# -----------------------------
+print("\nQuestion 3: Matrix Sum Calculations")
+A = [
+    [2, 3, 4],
+    [1, 5, 6],
+    [5, 8, 5]
+]
+
+diag_sum = 0
+above_diag = 0
+below_diag = 0
+elements = []
+
+for i in range(len(A)):
+    for j in range(len(A[i])):
+        elements.append(A[i][j])
+        if i == j:
+            diag_sum += A[i][j]
+        elif i < j:
+            above_diag += A[i][j]
+        elif i > j:
+            below_diag += A[i][j]
+
+print("Matrix:")
+for r in A:
+    print(r)
+
+print("Diagonal Sum:", diag_sum)
+print("Above Diagonal Sum:", above_diag)
+print("Below Diagonal Sum:", below_diag)
+print("Max Element:", max(elements))
+print("Min Element:", min(elements))
+
+
+# -----------------------------
+# Question 4: Student Marks Dictionary
+# -----------------------------
+print("\nQuestion 4: Student Marks Dictionary")
+N = int(input("Enter total number of students: "))
 details = {}
-for i in range(N): # 0,1
-    name = input("Enter the name: ")
-    marks = int(input("Enter the marks of "+name))
-    details[name]=marks
-names = list(details.keys())
+
+for i in range(N):
+    name = input(f"Enter name of student {i+1}: ")
+    marks = float(input(f"Enter marks of {name}: "))
+    details[name] = marks
+
 marks = list(details.values())
+print("Details:", details)
+print("Highest Marks:", max(marks))
+print("Lowest Marks:", min(marks))
+print("Average Marks:", sum(marks)/N)
 
-print('Highes Marks',max(marks))
-print('Lowest Marks',min(marks))
-print('Avg Marks',sum(marks)/N)
 
-# print('keys',details.keys())
-# print('values',details.values())
+# -----------------------------
+# Question 5: Student Subject Averages
+# -----------------------------
+print("\nQuestion 5: Average Marks of Students")
+students = [
+    ["john", 88, 86, 76, 66, 76],
+    ["sam", 77, 67, 87, 67, 56],
+    ["anna", 67, 65, 67, 76, 65],
+    ["ben", 87, 78, 67, 77, 57],
+    ["jeff", 90, 80, 79, 88, 70]
+]
+
+print("Average marks of each student:")
+for student in students:
+    name = student[0]
+    subjects = student[1:]
+    avg = sum(subjects) / len(subjects)
+    print(f"{name.title()}: {avg}")
