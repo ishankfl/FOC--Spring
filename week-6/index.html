@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Python Visualizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        textarea {
+            width: 90%;
+            height: 250px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            resize: vertical;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        #visualization {
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            min-height: 350px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            margin-top: 20px;
+        }
+        .trace-item {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-left: 5px solid #007bff; /* Default blue for line trace */
+            background-color: #e9f5ff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .trace-item strong {
+            color: #0056b3;
+        }
+        .trace-item.error {
+            border-left-color: #dc3545; /* Red for errors */
+            background-color: #fcecec;
+        }
+        .trace-item.error strong {
+            color: #c82333;
+        }
+        .trace-item.output {
+             border-left-color: #17a2b8; /* Cyan for output */
+             background-color: #e0f7fa;
+        }
+        .trace-item.output strong {
+            color: #117a8b;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 8px;
+            border: 1px dashed #e2e6ea;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐍 Python Code Visualizer 📊</h1>
+    <p>Enter your Python code below and click "Visualize Code" to see a simplified execution trace.</p>
+
+    <textarea id="pythonCode" spellcheck="false">
+def factorial(n):
+    if n == 0:
+        return 1
+    else:
+        # Recursive call
+        res = n * factorial(n-1)
+        return res
+
+num = 5
+result = factorial(num)
+print(f"The factorial of {num} is {result}")
+    </textarea><br>
+    <button onclick="runPython()">Visualize Code</button>
+
+    <h2>Execution Trace:</h2>
+    <div id="visualization">
+        <p>Your trace will appear after you run the code.</p>
+    </div>
+
+    <script>
+        async function runPython() {
+            const code = document.getElementById('pythonCode').value;
+            const visualizationDiv = document.getElementById('visualization');
+            visualizationDiv.innerHTML = '<p>Running your code and fetching trace... Please wait.</p>';
+
+            try {
+                // Send the Python code to your Flask backend
+                const response = await fetch('http://127.0.0.1:5000/run-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+
+                const trace = await response.json();
+                console.log("Received trace:", trace); // For debugging
+
+                visualizationDiv.innerHTML = ''; // Clear previous content
+
+                if (response.ok) {
+                    // Iterate through the trace items and display them
+                    trace.forEach(item => {
+                        const traceItemDiv = document.createElement('div');
+                        traceItemDiv.classList.add('trace-item');
+
+                        if (item.type === 'line') {
+                            let content = `<strong>Line ${item.line_number}:</strong><br>`;
+                            if (Object.keys(item.variables).length > 0) {
+                                content += `<em>Local Variables:</em> <pre>${JSON.stringify(item.variables, null, 2)}</pre>`;
+                            }
+                            if (Object.keys(item.globals).length > 0) {
+                                content += `<em>Global Variables:</em> <pre>${JSON.stringify(item.globals, null, 2)}</pre>`;
+                            }
+                            traceItemDiv.innerHTML = content;
+                        } else if (item.type === 'error') {
+                            traceItemDiv.classList.add('error');
+                            traceItemDiv.innerHTML = `<strong>Execution Error:</strong> <pre>${item.message}</pre>`;
+                        } else if (item.type === 'output') {
+                            traceItemDiv.classList.add('output');
+                            traceItemDiv.innerHTML = `<strong>Console Output:</strong> <pre>${item.content}</pre>`;
+                        }
+                        visualizationDiv.appendChild(traceItemDiv);
+                    });
+                } else {
+                    // Display server-side errors
+                    visualizationDiv.innerHTML = `<p class="trace-item error">Server Error: ${trace.error || 'Unknown error'}</p>`;
+                }
+
+            } catch (error) {
+                console.error('Error fetching visualization:', error);
+                visualizationDiv.innerHTML = `<p class="trace-item error">
+                    Could not connect to the Python backend server.
+                    <br>Please ensure the Flask server (app.py) is running at <code>http://127.0.0.1:5000</code>.
+                    <br>Error details: ${error.message}
+                </p>`;
+            }
+        }
+    </script>
+</body>
+</html>
